@@ -46,7 +46,6 @@ public class MasterHeartbeatCommandHandler implements CommandHandler {
 		logger.info("Recieve message: " + new String(msg));
 		*/
 		command.getSession().alive();
-		master.acceptStatistics(SlaveState.fromByteBuffer(command.getPayLoad()));
 		ByteBuffer buffer = ((MasterState)master.gatherStatistics()).toByteBuffer();
 		logger.info("MasterState to bytebuffer size: " + buffer.limit());
 		return CommandFactory.createHeartbeatCommand(buffer);
