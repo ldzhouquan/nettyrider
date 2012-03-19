@@ -94,7 +94,9 @@ public class NettyCommandProviderManager implements CommandProviderMannager<Chan
 				commandProvider = iterator.next();
 				command = commandProvider.produce();
 				if (command != null) {
+					logger.info("Provide a command and Send it");
 					channel.write(command);
+					command = null;
 					total++;
 				}
 			}

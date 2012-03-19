@@ -16,7 +16,6 @@ import com.taobao.top.command.CommandProviderMannager;
 import com.taobao.top.command.NettyCommandProviderManager;
 import com.taobao.top.command.SampleCommandDispatcher;
 import com.taobao.top.command.SlaveGreetCommandHandler;
-import com.taobao.top.command.SlaveHeartbeatCommandHandler;
 import com.taobao.top.config.NettyriderConfig;
 import com.taobao.top.master.MasterState;
 import com.taobao.top.network.netty.NettyNetWorkClient;
@@ -88,8 +87,7 @@ public class NettySlaveNode implements SlaveNode {
 
 	@Override
 	public boolean init() {
-		commandDispatcher.addCommandHandler(0L, new SlaveHeartbeatCommandHandler(this))
-						 .addCommandHandler(1l, new SlaveGreetCommandHandler());
+		commandDispatcher.addCommandHandler(1l, new SlaveGreetCommandHandler());
 		
 //		commandProviderMannager.addCommandProvider(new GreetCommandProvider());
 		

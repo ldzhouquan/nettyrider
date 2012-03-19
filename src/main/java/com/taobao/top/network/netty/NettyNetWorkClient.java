@@ -62,22 +62,29 @@ public class NettyNetWorkClient implements NetWorkClient {
 				+ "-WorkerExecutor"));
 		// init bootstrap
 		bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(bossExecutor, workerExecutor));
-		
+
 		return true;
 	}
 
 	@Override
 	public boolean start() {
 		// Set up the event pipeline factory.
-		bootstrap.setPipelineFactory(new CommandClientPipelineFactory(commandDispatcher, commandProviderMannager, new HashedWheelTimer()));
+		bootstrap.setPipelineFactory(new CommandClientPipelineFactory(commandDispatcher, commandProviderMannager,
+				new HashedWheelTimer()));
 		// Start the connection attempt.
 		ChannelFuture future = bootstrap.connect(new InetSocketAddress(hostName, port));
 		// Wait until the connection is closed or the connection attempt fails.
 		future.getChannel().getCloseFuture().awaitUninterruptibly();
 		// Shut down thread pools to exit.
 		this.stop();
-		
+
 		return true;
+	}
+
+	@Override
+	public boolean restart() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
@@ -96,12 +103,6 @@ public class NettyNetWorkClient implements NetWorkClient {
 	public NettyNetWorkClient withCommandProviderMannager(CommandProviderMannager<Channel> commandProviderMannager) {
 		this.commandProviderMannager = commandProviderMannager;
 		return this;
-	}
-	
-	@Override
-	public boolean restart() {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 }

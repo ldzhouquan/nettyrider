@@ -10,20 +10,20 @@ public class HeartbeatCommandProvider implements CommandProvider {
 	
 	@Override
 	public Command produce() {
-		return makeGreetCommand();
+		return makeHeartbeatCommand();
 	}
 
 	@Override
 	public List<Command> produce(long count) {
 		List<Command> commandList = new LinkedList<Command>();
 		for(int i = 0; i < count; i++){
-			commandList.add(makeGreetCommand());
+			commandList.add(makeHeartbeatCommand());
 		}
 		
 		return commandList;
 	}
 	
-	private Command makeGreetCommand() {
+	private Command makeHeartbeatCommand() {
 		ByteBuffer buffer = ByteBuffer.allocate(HELLO.getBytes().length);
 		buffer.put(HELLO.getBytes());
 		buffer.flip();

@@ -47,7 +47,7 @@ public class CommandClientPipelineFactory implements ChannelPipelineFactory {
 
 		// 添加心跳机制，当客户端channel读(写)空闲60s秒时
 		// 一个状态为IdleState.READER_IDLE(IdleState.WRITER_IDLE)的IdleStateEvent被触发
-		pipeline.addLast("timeout", new IdleStateHandler(timer, 60, 60, 0));
+		pipeline.addLast("timeout", new IdleStateHandler(timer, 0, 60, 0));
 		pipeline.addLast("heartbeat", new HeartBeatHandler());
 		return pipeline;
 	}

@@ -1,5 +1,7 @@
 package com.taobao.top.network.netty.handler;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -41,13 +43,23 @@ public class CommandServerChannelHandler extends SimpleChannelHandler {
 	
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-		if (!(e.getMessage() instanceof Command)) {
+		if (!(e.getMessage() instanceof List)) {
 			return;
 		}
-		Command command = (Command) e.getMessage();
+		@SuppressWarnings("unchecked")
+		List<Command> commands = (List<Command>) e.getMessage();
+		
 		NettySession session = (NettySession) ctx.getAttachment();
-		command.setSession(session);
-		session.addCommand(command);
+		
+		for(Command command:commands){
+			
+			// 重置session状态
+			session.alive();
+			session.addCommand(command);
+			
+			// 为command注入session
+			command.setSession(session);
+		}
 	}
 	
 	@Override
@@ -56,3 +68,4 @@ public class CommandServerChannelHandler extends SimpleChannelHandler {
 		logger.error(e.getCause());
 	}
 }
+

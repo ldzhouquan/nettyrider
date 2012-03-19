@@ -15,20 +15,33 @@ import com.taobao.top.command.Command;
  * @version 1.0
  * @since 2012-2-10
  */
-public class CommandEncoder extends OneToOneEncoder{
+public class CommandEncoder extends OneToOneEncoder {
 
 	@Override
 	protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
-		if(!(msg instanceof Command)){
+		if (!(msg instanceof Command)) {
 			return msg;
 		}
-		
 		Command command = (Command) msg;
-		
+
+		// 将command写入流中
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		buffer.writeBytes(command.marshall());
-		
+		buffer.writeLong(command.getType());
+		buffer.writeInt(command.getSize());
+		buffer.writeBytes(command.getPayLoad());
+
+		// 释放command的资源
+		freeCommand(command);
+
 		return buffer;
+	}
+
+	/**
+	 * @param command
+	 */
+	private void freeCommand(Command command) {
+		command.setPayLoad(null);
+		command = null;
 	}
 
 }

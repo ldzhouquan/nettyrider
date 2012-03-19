@@ -23,10 +23,10 @@ import com.taobao.top.session.NettySessionManager;
  */
 public class NettyMasterNode implements MasterNode {
 
-	private NettyriderConfig config; // 运行配置
-	private NetWorkServer netWorkServer; // 底层网络服务
-	private CommandDispatcher commandDispatcher; // 命令分发器
-	private AtomicLong stateIDGenrator = new AtomicLong(0); // 状态计数器
+	private NettyriderConfig config; 								// 运行配置
+	private NetWorkServer netWorkServer;							// 底层网络服务
+	private CommandDispatcher commandDispatcher; 					// 命令分发器
+	private AtomicLong stateIDGenrator = new AtomicLong(0); 		// 状态计数器
 	private NettySessionManager sessionManager;
 
 	/**
@@ -35,6 +35,9 @@ public class NettyMasterNode implements MasterNode {
 	public NettyMasterNode(NettyriderConfig config) {
 		super();
 		this.config = config;
+		sessionManager = new NettySessionManager(this.config);
+		netWorkServer = new NettyNetWorkServer(this.config, sessionManager);
+		commandDispatcher = new SampleCommandDispatcher();
 	}
 
 	@Override
@@ -63,11 +66,8 @@ public class NettyMasterNode implements MasterNode {
 
 	@Override
 	public boolean init() {
-		sessionManager = new NettySessionManager(config);
-		netWorkServer = new NettyNetWorkServer(config, sessionManager);
-		commandDispatcher = new SampleCommandDispatcher();
-		commandDispatcher.addCommandHandler(0l, new MasterHeartbeatCommandHandler(this))
-						 .addCommandHandler(1l,	new MasterGreetCommandHandler());
+		commandDispatcher.addCommandHandler(0l, new MasterHeartbeatCommandHandler());
+		commandDispatcher.addCommandHandler(1l, new MasterGreetCommandHandler());
 		sessionManager.setCommandDispatcher(commandDispatcher);
 		return netWorkServer.init() && sessionManager.init();
 	}

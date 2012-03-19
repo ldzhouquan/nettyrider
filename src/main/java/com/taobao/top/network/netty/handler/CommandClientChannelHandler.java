@@ -1,5 +1,7 @@
 package com.taobao.top.network.netty.handler;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.Channel;
@@ -21,24 +23,24 @@ import com.taobao.top.command.CommandProviderMannager;
  * @since 2012-2-13
  */
 public class CommandClientChannelHandler extends SimpleChannelHandler {
-	
+
 	private static final Log logger = LogFactory.getLog(CommandClientChannelHandler.class);
-	
+
 	// 命令分发器
 	private final CommandDispatcher commandDispatcher;
-	
+
 	// 命令产生器
 	private final CommandProviderMannager<Channel> commandProviderMannager;
 
-
-	public CommandClientChannelHandler(CommandDispatcher commandDispatcher,CommandProviderMannager<Channel> commandProviderMannager) {
+	public CommandClientChannelHandler(CommandDispatcher commandDispatcher,
+			CommandProviderMannager<Channel> commandProviderMannager) {
 		this.commandDispatcher = commandDispatcher;
 		this.commandProviderMannager = commandProviderMannager;
 	}
-	
+
 	@Override
 	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-		// channel连接完毕后，开始创造command，并写入channel中
+		// channel连接完毕后，产生主动拉任务命令
 		commandProviderMannager.withChannel(ctx.getChannel());
 		commandProviderMannager.init();
 		commandProviderMannager.start();
@@ -46,20 +48,27 @@ public class CommandClientChannelHandler extends SimpleChannelHandler {
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-		if (!(e.getMessage() instanceof Command)) {
+		if (!(e.getMessage() instanceof List)) {
 			return;
 		}
 		// 解析Command并分发
-		Command input = (Command) e.getMessage();
-		Command output = commandDispatcher.dispatch(input);
-		if(output!=null){
-			ctx.getChannel().write(output);
+		@SuppressWarnings("unchecked")
+		List<Command> commands = (List<Command>) e.getMessage();
+		Channel channel = ctx.getChannel();
+		for (Command input : commands) {
+			Command output = commandDispatcher.dispatch(input);
+			if (output != null) {
+				logger.error("Received a command and write output back!");
+				channel.write(output);
+				output = null;
+				input = null;
+			}
 		}
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
 		e.getCause().printStackTrace();
-		logger.equals(e.getCause().getMessage());
+		logger.error(e.getCause().getMessage());
 	}
 }
